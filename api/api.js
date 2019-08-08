@@ -1,0 +1,121 @@
+const express=require('express');
+const mongoose=require('mongoose');
+const session=require('express-session');
+const cookieParser=require('cookie-parser');
+const MongoStore=require('connect-mongo')(session);
+const bodyParser=require('body-parser');
+const formidable=require('express-formidable');
+const bcrypt=require('bcrypt');
+const cors=require('cors');
+
+const router=express.Router();
+mongoose.connect('mongodb://localhost:27017/game', {useNewUrlParser: true}).then(()=>{
+    console.log('connected')
+}).catch((error)=>{
+    console.error(error)
+});
+
+router.use(cookieParser());
+router.use(formidable());
+router.use(cors());
+
+router.use(session({
+    secret: 'very-secret',
+    resave: true,
+    saveUninitialized: true,
+    maxAge: 7200000,
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection
+    })
+}))
+
+const User=require('../schemas/UserSchema');
+
+router.post('/signup',(req, res)=>{
+    const saltRounds=10;
+    console.log(req.fields)
+    if(req.fields.email && req.fields.password && req.fields.userName){
+        bcrypt.hash(req.fields.password, saltRounds, function(error, hash) {
+            if(error){
+                res.status(409)
+                res.send({message: 'password failed'})
+                return
+            }
+            const createdUser=new User({
+                email: req.fields.email,
+                password: hash,
+                name: req.fields.userName
+            })
+            createdUser.save().then((error, data)=>{
+                if(error) console.error(error);
+                console.log(data)
+            })
+            res.send("dbData")
+        });
+    }else{
+        res.status(409)
+        res.send({message: 'form not valid'})
+    }
+
+})
+
+router.post('/login',(req, res)=>{
+    console.log(req.fields)
+    if(req.fields.email && req.fields.password){
+        User.findOne({email: req.fields.email},(error, data)=>{
+            if(error){
+                res.status(409)
+                res.send({message: 'something went wrong'})
+                return
+            }
+            if(!data){
+                res.status(404)
+                res.send({message: 'no user with this combination of email and password found'})
+                return
+            }
+            bcrypt.compare(req.fields.password, data.password, (error, pwdMatches)=>{
+                if(pwdMatches){
+                    const mySession=req.session;
+                    console.log(mySession)
+                    return res.send({message: 'succesfully logged in'})
+                }
+                console.log(error)
+                res.status(404)
+                return res.send({message: 'no user with this combination of email and password found'})
+                
+            })
+
+        })
+    }else{
+        res.status(409)
+        res.send({message: 'fields missing'})
+    }
+})
+
+router.get('/logout',(req, res)=>{
+    req.session.destroy((error)=>{
+        if(error){
+            res.status(200);
+            return res.send({message: 'could not delete your session... logged you out anyway'})
+        }
+        return res.send({message: 'succesfully logged out'})
+    })
+})
+
+router.get('/user/:name',(req, res)=>{
+    if(req.params.name){
+        const dbData=User.find({name: req.params.name},(error, data)=>{
+            if(error){
+                console.error(error)
+                res.send(error)
+            } 
+            console.log(data)
+            res.send(data)
+        })
+    }else{
+        res.send('something went wrong')
+    }
+
+})
+
+module.exports=router;

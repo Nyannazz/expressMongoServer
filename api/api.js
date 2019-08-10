@@ -18,7 +18,8 @@ mongoose.connect('mongodb://localhost:27017/game', {useNewUrlParser: true}).then
 router.use(cookieParser());
 router.use(formidable());
 router.use(cors({
-    credentials: true
+    credentials: true,
+    origin: 'http://localhost:3000'
 }));
 
 router.use(session({
@@ -128,6 +129,7 @@ router.get('/user/:name',(req, res)=>{
 })
 
 router.post('/setscore',(req, res)=>{
+    return res.send(req.session)
     if(req.session.email && User.schema.obj.scores.hasOwnProperty(req.fields.game)){
         const updateObject={[`scores.${req.fields.game}`]: req.fields.score}
         User.update({email: req.session.email}, {$set: updateObject},(error, data)=>{
@@ -139,6 +141,7 @@ router.post('/setscore',(req, res)=>{
         })
     }
     else{
+        res.status(400);
         return res.send({message: 'you dont seem to have an active session please login'})
     }
 

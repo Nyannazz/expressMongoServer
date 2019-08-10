@@ -27,7 +27,8 @@ router.use(session({
     resave: true,
     saveUninitialized: true,
     maxAge: 7200000,
-    cookie: {maxAge: 7200000},
+    httpOnly: false,
+    cookie: {maxAge: 7200000, httpOnly: false},
     store: new MongoStore({
         mongooseConnection: mongoose.connection,
         maxAge: 7200000

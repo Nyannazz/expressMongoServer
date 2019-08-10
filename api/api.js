@@ -17,7 +17,9 @@ mongoose.connect('mongodb://localhost:27017/game', {useNewUrlParser: true}).then
 
 router.use(cookieParser());
 router.use(formidable());
-router.use(cors());
+router.use(cors({
+    credentials: true
+}));
 
 router.use(session({
     secret: 'very-secret',
@@ -33,7 +35,6 @@ const User=require('../schemas/UserSchema');
 
 router.post('/signup',(req, res)=>{
     const saltRounds=10;
-    console.log(req.fields)
     if(req.fields.email && req.fields.password && req.fields.userName){
         bcrypt.hash(req.fields.password, saltRounds, function(error, hash) {
             if(error){
@@ -46,13 +47,11 @@ router.post('/signup',(req, res)=>{
                 password: hash,
                 name: req.fields.userName
             })
-            createdUser.save().then((error, data)=>{
-                if(error){
-                    console.error(error);
-                    res.status(409);
-                    return res.send({message: 'user already exists'}) 
-                } 
+            createdUser.save().then(data=>{
                 return res.send({message: 'user created'})
+            }).catch(error=>{
+                res.status(409);
+                return res.send({message: 'user already exists'})
             })
         });
     }else{
@@ -72,19 +71,19 @@ router.post('/login',(req, res)=>{
         User.findOne({email: req.fields.email},(error, data)=>{
             if(error){
                 res.status(409)
-                res.send({message: 'something went wrong'})
-                return
+                return res.send({message: 'something went wrong'})
+                
             }
             if(!data){
                 res.status(404)
-                res.send({message: 'no user with this combination of email and password found'})
-                return
+                return res.send({message: 'no user with this combination of email and password found'})
             }
             bcrypt.compare(req.fields.password, data.password, (error, pwdMatches)=>{
                 if(pwdMatches){
                     /* SUCCES */
+                    req.session.email=req.fields.email;
                     const mySession=req.session;
-                    console.log(mySession)
+                    console.log(mySession);
                     const {name, email, scores}=data;
                     return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
                 }
@@ -104,7 +103,6 @@ router.post('/login',(req, res)=>{
 router.get('/logout',(req, res)=>{
     req.session.destroy((error)=>{
         if(error){
-            res.status(200);
             return res.send({message: 'could not delete your session... logged you out anyway'})
         }
         return res.send({message: 'succesfully logged out'})
@@ -124,6 +122,10 @@ router.get('/user/:name',(req, res)=>{
     }else{
         res.send('something went wrong')
     }
+
+})
+
+router.post('/setScore/:game',(req, res)=>{
 
 })
 

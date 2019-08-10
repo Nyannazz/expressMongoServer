@@ -26,8 +26,10 @@ router.use(session({
     resave: true,
     saveUninitialized: true,
     maxAge: 7200000,
+    cookie: {maxAge: 7200000},
     store: new MongoStore({
-        mongooseConnection: mongoose.connection
+        mongooseConnection: mongoose.connection,
+        maxAge: 7200000
     })
 }))
 
@@ -125,7 +127,20 @@ router.get('/user/:name',(req, res)=>{
 
 })
 
-router.post('/setScore/:game',(req, res)=>{
+router.post('/setscore',(req, res)=>{
+    if(req.session.email && User.schema.obj.scores.hasOwnProperty(req.fields.game)){
+        const updateObject={[`scores.${req.fields.game}`]: req.fields.score}
+        User.update({email: req.session.email}, {$set: updateObject},(error, data)=>{
+            if(error){
+                res.status(404);
+                return res.send({message: 'user not found'})
+            }
+            return res.send({message: 'succes', session: req.session, userData: data})
+        })
+    }
+    else{
+        return res.send({message: 'you dont seem to have an active session please login'})
+    }
 
 })
 

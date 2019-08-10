@@ -22,9 +22,9 @@ const UserSchema=new mongoose.Schema({
         unique: true,
     },
     scores: {
-        word: Number,
-        reaction: Number,
-        number: Number
+        word: {type: Number, default: 0},
+        reaction: {type: Number, default: 0},
+        number: {type: Number, default: 0}
     }
 })
 

@@ -47,16 +47,23 @@ router.post('/signup',(req, res)=>{
                 name: req.fields.userName
             })
             createdUser.save().then((error, data)=>{
-                if(error) console.error(error);
-                console.log(data)
+                if(error){
+                    console.error(error);
+                    res.status(409);
+                    return res.send({message: 'user already exists'}) 
+                } 
+                return res.send({message: 'user created'})
             })
-            res.send("dbData")
         });
     }else{
         res.status(409)
-        res.send({message: 'form not valid'})
+        return res.send({message: 'form not valid'})
     }
 
+})
+
+router.get('/test',(req, res)=>{
+    
 })
 
 router.post('/login',(req, res)=>{
@@ -75,9 +82,11 @@ router.post('/login',(req, res)=>{
             }
             bcrypt.compare(req.fields.password, data.password, (error, pwdMatches)=>{
                 if(pwdMatches){
+                    /* SUCCES */
                     const mySession=req.session;
                     console.log(mySession)
-                    return res.send({message: 'succesfully logged in'})
+                    const {name, email, scores}=data;
+                    return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
                 }
                 console.log(error)
                 res.status(404)

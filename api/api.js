@@ -130,7 +130,6 @@ router.get('/user/:name',(req, res)=>{
 })
 
 router.post('/setscore',(req, res)=>{
-    return res.send(req.session)
     if(req.session.email && User.schema.obj.scores.hasOwnProperty(req.fields.game)){
         const updateObject={[`scores.${req.fields.game}`]: req.fields.score}
         User.update({email: req.session.email}, {$set: updateObject},(error, data)=>{

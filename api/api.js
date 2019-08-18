@@ -147,4 +147,48 @@ router.post('/setscore',(req, res)=>{
 
 })
 
+let scoreStats={
+    word: {},
+    reaction: {},
+    number: {}
+};
+
+
+
+(function createRandomNum(){
+    setTimeout(()=>{
+        getScoreStats()
+        createRandomNum()
+    },20000);
+})()
+
+
+function getScoreStats(){
+    let highScoreObject={
+        word: {},
+        reaction: {},
+        number: {}
+    };
+
+    User.find({},'scores').then(data=>{
+        for(let i=0;i<data.length;i++){
+            const scores=data[i].scores;
+            highScoreObject.word[scores.word]=(highScoreObject.word[scores.word] || 0) + 1;
+
+            highScoreObject.reaction[scores.reaction]=(highScoreObject.reaction[scores.reaction] || 0) + 1;
+
+            highScoreObject.number[scores.number]=(highScoreObject.number[scores.number] || 0) + 1;
+        }
+        scoreStats=highScoreObject
+    })
+
+}
+
+
+
+
+router.get('/getstats/:game',(req, res)=>{
+    res.send({num: scoreStats,data: randomNum, params:req.params.game})
+})
+
 module.exports=router;

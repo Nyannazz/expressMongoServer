@@ -25,7 +25,8 @@ app.get('/randomword',(req, res)=>{
 })
 
 app.get('*', (req, res) => {
-    res.sendfile(path.join(__dirname = 'client/build/index.html'));
+    //res.sendFile(path.join(__dirname = 'client/build/index.html'));
+    res.sendFile('index.html',{root: `${__dirname}/client/build`})
 })
 
 

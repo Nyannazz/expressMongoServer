@@ -3,7 +3,7 @@ const mongoose=require('mongoose');
 const session=require('express-session');
 const cookieParser=require('cookie-parser');
 const MongoStore=require('connect-mongo')(session);
-const bodyParser=require('body-parser');
+/* const bodyParser=require('body-parser'); */
 const formidable=require('express-formidable');
 const bcrypt=require('bcrypt');
 const cors=require('cors');
@@ -147,14 +147,13 @@ router.post('/setscore',(req, res)=>{
 
 })
 
+
+/* every 20 seconds update the scoreStats object with new data from the database */
 let scoreStats={
     word: {},
     reaction: {},
     number: {}
 };
-
-
-
 (function createRandomNum(){
     setTimeout(()=>{
         getScoreStats()
@@ -173,6 +172,8 @@ function getScoreStats(){
     User.find({},'scores').then(data=>{
         for(let i=0;i<data.length;i++){
             const scores=data[i].scores;
+
+            /* count the score distribution  in the database*/
             highScoreObject.word[scores.word]=(highScoreObject.word[scores.word] || 0) + 1;
 
             highScoreObject.reaction[scores.reaction]=(highScoreObject.reaction[scores.reaction] || 0) + 1;
@@ -187,8 +188,24 @@ function getScoreStats(){
 
 
 
+
+
 router.get('/getstats/:game',(req, res)=>{
-    res.send({num: scoreStats,data: randomNum, params:req.params.game})
+    const game=req.params.game;
+    switch(game){
+        case 'word':
+            res.send(scoreStats.word)
+            break
+        case 'number':
+            res.send(scoreStats.number)
+            break
+        case 'reaction':
+            res.send(scoreStats.reaction)
+            break
+        default:
+            res.status(404)
+            res.send({message: 'unknown parameter... try one of these word, number or reaction'})
+    }
 })
 
 module.exports=router;

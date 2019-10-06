@@ -15,8 +15,8 @@ async function transporter() {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: 'monkey@baizuo.online', // generated ethereal user
-            pass: 'Lj2life1sap4girls!' // generated ethereal password
+            user: process.env.MAIL_ADRESS, // generated ethereal user
+            pass: process.env.MAIL_PASSWORD // generated ethereal password
         },
         tls: {
             rejectUnauthorized: false

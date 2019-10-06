@@ -68,8 +68,9 @@ router.post('/signup',(req, res)=>{
 })
 
 router.get('/testmail',(req, res)=>{
-    confirmMail();
-    res.send("mail send");
+    //confirmMail();
+    console.log(process.env)
+    res.send(process.env.PORT);
 });
 
 

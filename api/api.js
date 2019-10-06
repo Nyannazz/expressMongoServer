@@ -3,10 +3,12 @@ const mongoose=require('mongoose');
 const session=require('express-session');
 const cookieParser=require('cookie-parser');
 const MongoStore=require('connect-mongo')(session);
-/* const bodyParser=require('body-parser'); */
 const formidable=require('express-formidable');
 const bcrypt=require('bcrypt');
 const cors=require('cors');
+const confirmMail=require('../mail/confirmMail.js');
+
+
 
 const router=express.Router();
 mongoose.connect('mongodb://localhost:27017/game', {useNewUrlParser: true}).then(()=>{
@@ -65,9 +67,12 @@ router.post('/signup',(req, res)=>{
 
 })
 
-router.get('/test',(req, res)=>{
-    
-})
+router.get('/testmail',(req, res)=>{
+    confirmMail();
+    res.send("mail send");
+});
+
+
 
 router.post('/login',(req, res)=>{
     console.log(req.fields)

@@ -25,6 +25,14 @@ const UserSchema=new mongoose.Schema({
         word: {type: Number, default: 0},
         reaction: {type: Number, default: 0},
         number: {type: Number, default: 0}
+    },
+    active: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
+    email_confirm_hash: {
+        type: String,
     }
 })
 

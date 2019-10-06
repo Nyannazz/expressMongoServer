@@ -18,6 +18,7 @@
     "express-formidable": "^1.2.0",
     "express-session": "^1.16.2",
     "mongoose": "^5.6.8",
+    "nodemailer": "^6.3.0",
     "validator": "^11.1.0"
   }
 }

@@ -31,8 +31,11 @@ const UserSchema=new mongoose.Schema({
         required: true,
         default: false
     },
-    email_confirm_hash: {
+    email_confirm_key: {
         type: String,
+    },
+    send_again_key: {
+        type: String
     }
 })
 

@@ -7,6 +7,7 @@ const formidable=require('express-formidable');
 const bcrypt=require('bcrypt');
 const cors=require('cors');
 const confirmMail=require('../mail/confirmMail.js');
+const uniqid=require('uniqid');
 
 
 
@@ -51,10 +52,14 @@ router.post('/signup',(req, res)=>{
             const createdUser=new User({
                 email: req.fields.email,
                 password: hash,
-                name: req.fields.userName
+                name: req.fields.userName,
+                active: false,
+                email_confirm_key: uniqid(),
+                send_again_key: uniqid()
             })
             createdUser.save().then(data=>{
-                return res.send({message: 'user created'})
+                confirmMail(data.email, data.email_confirm_key);
+                return res.send({message: `confirmation mail sent to ${data.email}`, sendAgainPath: `confirmagain/${data.send_again_key}`})
             }).catch(error=>{
                 res.status(409);
                 return res.send({message: 'user already exists'})
@@ -67,11 +72,42 @@ router.post('/signup',(req, res)=>{
 
 })
 
-router.get('/testmail',(req, res)=>{
-    //confirmMail();
-    console.log(process.env)
-    res.send(process.env.PORT);
-});
+router.get('/confirmagain/:key',(req, res)=>{
+    User.findOne({send_again_key: req.params.key},(error, data)=>{
+        if(error){
+            res.status(409)
+            return res.send({message: 'something went wrong'})
+        }
+        if(!data){
+            res.status(404)
+            return res.send({message: 'please log in to send another key'})
+        }
+        confirmMail(data.email, data.email_confirm_key);
+        return res.send({message: `key sent to: ${data.email}`})
+    })
+})
+
+
+router.get('/confirm/:key/:email',(req, res)=>{
+    User.findOne({email_confirm_key: req.params.key, email: req.params.email},(error, data)=>{
+        if(error){
+            res.status(409)
+            return res.send({message: 'something went wrong'})
+        }
+        if(!data){
+            res.status(404)
+            return res.send({message: 'key does not seem to match this email'})
+        }
+        data.active=true;
+        data.save(error=>{
+            if(error){
+                res.status(409)
+                return res.send({message: 'something went wrong'})
+            }
+            return res.send('succesfully confirmed your email you can now log in <a href=http://localhost:3000/login>http://localhost:3000/login</a>');
+        })
+    })
+})
 
 
 
@@ -82,7 +118,6 @@ router.post('/login',(req, res)=>{
             if(error){
                 res.status(409)
                 return res.send({message: 'something went wrong'})
-                
             }
             if(!data){
                 res.status(404)
@@ -91,11 +126,18 @@ router.post('/login',(req, res)=>{
             bcrypt.compare(req.fields.password, data.password, (error, pwdMatches)=>{
                 if(pwdMatches){
                     /* SUCCES */
-                    req.session.email=req.fields.email;
-                    const mySession=req.session;
-                    console.log(mySession);
-                    const {name, email, scores}=data;
-                    return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
+                    if(data.active){
+                        req.session.email=req.fields.email;
+                        const mySession=req.session;
+                        console.log(mySession);
+                        const {name, email, scores}=data;
+                        return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
+                    }else{
+                        confirmMail(data.email, data.email_confirm_key);
+                        res.status(403)
+                        return res.send({message: `key sent to: ${data.email}`})
+                    }
+                    
                 }
                 console.log(error)
                 res.status(404)

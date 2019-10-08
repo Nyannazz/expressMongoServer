@@ -83,7 +83,7 @@ router.get('/confirmagain/:key',(req, res)=>{
             return res.send({message: 'please log in to send another key'})
         }
         confirmMail(data.email, data.email_confirm_key);
-        return res.send({message: `key sent to: ${data.email}`})
+        return res.send({message: `email confirm key sent to: ${data.email}`})
     })
 })
 
@@ -112,7 +112,6 @@ router.get('/confirm/:key/:email',(req, res)=>{
 
 
 router.post('/login',(req, res)=>{
-    console.log(req.fields)
     if(req.fields.email && req.fields.password){
         User.findOne({email: req.fields.email},(error, data)=>{
             if(error){
@@ -135,7 +134,7 @@ router.post('/login',(req, res)=>{
                     }else{
                         confirmMail(data.email, data.email_confirm_key);
                         res.status(403)
-                        return res.send({message: `key sent to: ${data.email}`})
+                        return res.send({message: `email confirm key sent to: ${data.email}`})
                     }
                     
                 }
@@ -163,7 +162,7 @@ router.get('/logout',(req, res)=>{
 
 router.get('/user/:name',(req, res)=>{
     if(req.params.name){
-        const dbData=User.find({name: req.params.name},(error, data)=>{
+        User.find({name: req.params.name},(error, data)=>{
             if(error){
                 console.error(error)
                 res.send(error)

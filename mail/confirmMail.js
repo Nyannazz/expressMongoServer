@@ -32,9 +32,12 @@ async function transporter(targetmail, uID) {
         subject: 'Hello ✔', // Subject line
         text: `follow this link to confirm your mail http://localhost:5000/api/confirm/${uID}/${targetmail}`, // plain text body
         html: `<b>follow this link to confirm your mail <a href=http://localhost:5000/api/confirm/${uID}/${targetmail}>http://localhost:5000/api/confirm/${uID}/${targetmail}</a></b>` // html body
+    },(error, response)=>{
+        if(error){
+            console.log("failed sending to: "+targetmail)
+        }
     });
 
-    console.log('Message sent: %s', info.messageId);
 
 
 }

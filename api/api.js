@@ -6,9 +6,9 @@ const MongoStore=require('connect-mongo')(session);
 const formidable=require('express-formidable');
 const bcrypt=require('bcrypt');
 const cors=require('cors');
-const confirmMail=require('../mail/confirmMail.js');
+const mailService=require('../mail/mailService.js');
 const uniqid=require('uniqid');
-
+const emails=require('../mail/emails.js');
 
 
 const router=express.Router();
@@ -58,7 +58,7 @@ router.post('/signup',(req, res)=>{
                 send_again_key: uniqid()
             })
             createdUser.save().then(data=>{
-                confirmMail(data.email, data.email_confirm_key);
+                mailService(data.email, emails.emailConfirmMail(data.email, data.email_confirm_key));
                 return res.send({message: `confirmation mail sent to ${data.email}`, sendAgainPath: `confirmagain/${data.send_again_key}`})
             }).catch(error=>{
                 res.status(409);
@@ -82,7 +82,7 @@ router.get('/confirmagain/:key',(req, res)=>{
             res.status(404)
             return res.send({message: 'please log in to send another key'})
         }
-        confirmMail(data.email, data.email_confirm_key);
+        mailService(data.email, emails.emailConfirmMail(data.email, data.email_confirm_key));
         return res.send({message: `email confirm key sent to: ${data.email}`})
     })
 })
@@ -111,6 +111,41 @@ router.get('/confirm/:key/:email',(req, res)=>{
 
 
 
+router.post('/resetpassword',(req, res)=>{
+    const email=req.fields.email;
+    User.findOne({email: email}
+    ).then((data)=>{
+        if(!data) return res.send({message: "no with this email found"}, 404);
+        data.reset_password_key=uniqid();
+        data.save(error=>{
+            if(error){
+                res.status(500)
+                return res.send({message: 'something went wrong'})
+            }
+            mailService(data.email, emails.resetPasswordMail(data.email, data.reset_password_key));
+            return res.send(`sent password reset link to ${data.email}`);
+        })
+    })
+})
+
+router.post('/createnewpassword',(req, res)=>{
+    const email=req.fields.email;
+    User.findOne({email: email}
+    ).then((data)=>{
+        if(!data) return res.send({message: "no with this email found"}, 404);
+        data.reset_password_key=uniqid();
+        data.save(error=>{
+            if(error){
+                res.status(500)
+                return res.send({message: 'something went wrong'})
+            }
+            return res.send(`sent password reset link to ${data.email}`);
+        })
+    })
+})
+
+
+
 router.post('/login',(req, res)=>{
     if(req.fields.email && req.fields.password){
         User.findOne({email: req.fields.email},(error, data)=>{
@@ -132,7 +167,7 @@ router.post('/login',(req, res)=>{
                         const {name, email, scores}=data;
                         return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
                     }else{
-                        confirmMail(data.email, data.email_confirm_key);
+                        mailService(data.email, emails.emailConfirmMail(data.email, data.email_confirm_key));
                         res.status(403)
                         return res.send({message: `email confirm key sent to: ${data.email}`})
                     }

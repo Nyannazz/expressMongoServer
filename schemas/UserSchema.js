@@ -33,9 +33,15 @@ const UserSchema=new mongoose.Schema({
     },
     email_confirm_key: {
         type: String,
+        unique: true
     },
     send_again_key: {
-        type: String
+        type: String,
+        unique: true
+    },
+    reset_password_key:{
+        type: String,
+        unique: true
     }
 })
 

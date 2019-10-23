@@ -15,8 +15,8 @@ async function transporter(targetmail, mail) {
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-            user: process.env.MAIL_ADRESS, // generated ethereal user
-            pass: process.env.MAIL_PASSWORD // generated ethereal password
+            user: process.env.MAIL_ADRESS, 
+            pass: process.env.MAIL_PASSWORD 
         },
         tls: {
             rejectUnauthorized: false
@@ -29,7 +29,7 @@ async function transporter(targetmail, mail) {
     let info = await transporter.sendMail({
         from: 'monkey@baizuo.online', // sender address
         to: targetmail, // list of receivers
-        subject: 'Hello ✔', // Subject line
+        subject: mail.subject, // Subject line
         text: mail.text || "",
         html: mail.html || ""
     },(error, response)=>{

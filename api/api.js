@@ -111,11 +111,43 @@ router.get('/confirm/:key/:email',(req, res)=>{
 
 
 
+router.post('/createnewpassword',(req, res)=>{
+    if(req.fields.email && req.fields.key && req.fields.password){
+        const saltRounds=10;
+        User.findOne({email: req.fields.email}
+            ).then((data)=>{
+                if(!data) return res.send({message: "no user with this email found"}, 404);
+                if(data.reset_password_key===req.fields.key){
+                    bcrypt.hash(req.fields.password, saltRounds, function(error, hash) {
+                        if(error){
+                            return res.send({message: 'password failed'}, 409)
+                        }
+                        data.password=hash;
+                        data.reset_password_key=uniqid();
+                        data.save(error=>{
+                            if(error){
+                                return res.send({message: 'something went wrong'},500)
+                            }
+                            return res.send(`password succesfully reset`);
+                        })
+                    });
+                    
+                }else{
+                    res.send({message: 'please request a new key to reset your password'})
+                }                 
+            })
+    }else{
+        res.send({message: 'your request seems to be missing some fields'})
+    } 
+    
+    
+})
+
 router.post('/resetpassword',(req, res)=>{
     const email=req.fields.email;
     User.findOne({email: email}
     ).then((data)=>{
-        if(!data) return res.send({message: "no with this email found"}, 404);
+        if(!data) return res.send({message: "no user with this email found"}, 404);
         data.reset_password_key=uniqid();
         data.save(error=>{
             if(error){
@@ -123,22 +155,6 @@ router.post('/resetpassword',(req, res)=>{
                 return res.send({message: 'something went wrong'})
             }
             mailService(data.email, emails.resetPasswordMail(data.email, data.reset_password_key));
-            return res.send(`sent password reset link to ${data.email}`);
-        })
-    })
-})
-
-router.post('/createnewpassword',(req, res)=>{
-    const email=req.fields.email;
-    User.findOne({email: email}
-    ).then((data)=>{
-        if(!data) return res.send({message: "no with this email found"}, 404);
-        data.reset_password_key=uniqid();
-        data.save(error=>{
-            if(error){
-                res.status(500)
-                return res.send({message: 'something went wrong'})
-            }
             return res.send(`sent password reset link to ${data.email}`);
         })
     })
@@ -267,12 +283,30 @@ function getScoreStats(){
 
 }
 
+router.get('/getuser',(req, res)=>{
+    const session=req.session.email;
+    if(session){
+        User.find({email: session},(error, data)=>{
+            if(error) return res.send({message: "user not found"},404);
+
+            if(data){
+                const {name, email, scores}=data;
+                return res.send({user: {name, email, scores}, message: 'succes'})
+            }
+        })
+    }
+    res.send({message: "please log in"},403);
+})
+
 
 
 
 
 
 router.get('/getstats/:game',(req, res)=>{
+    req.session.touch();
+    console.dir(req.session.id)
+    console.dir(req.cookies)
     const game=req.params.game;
     switch(game){
         case 'word':
@@ -289,5 +323,9 @@ router.get('/getstats/:game',(req, res)=>{
             res.send({message: 'unknown parameter... try one of these word, number or reaction'})
     }
 })
+
+
+
+
 
 module.exports=router;

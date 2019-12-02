@@ -179,7 +179,7 @@ router.post('/login',(req, res)=>{
                     if(data.active){
                         req.session.email=req.fields.email;
                         const mySession=req.session;
-                        console.log(mySession);
+                        /* console.log(mySession); */
                         const {name, email, scores}=data;
                         return res.send({user: {name, email, scores}, message: 'succesfully logged in'})
                     }else{
@@ -189,7 +189,7 @@ router.post('/login',(req, res)=>{
                     }
                     
                 }
-                console.log(error)
+                /* console.log(error) */
                 res.status(404)
                 return res.send({message: 'no user with this combination of email and password found'})
                 
@@ -215,10 +215,10 @@ router.get('/user/:name',(req, res)=>{
     if(req.params.name){
         User.find({name: req.params.name},(error, data)=>{
             if(error){
-                console.error(error)
+                /* console.error(error) */
                 res.send(error)
             } 
-            console.log(data)
+            /* console.log(data) */
             res.send(data)
         })
     }else{
@@ -305,8 +305,8 @@ router.get('/getuser',(req, res)=>{
 
 router.get('/getstats/:game',(req, res)=>{
     req.session.touch();
-    console.dir(req.session.id)
-    console.dir(req.cookies)
+    /* console.dir(req.session.id)
+    console.dir(req.cookies) */
     const game=req.params.game;
     switch(game){
         case 'word':

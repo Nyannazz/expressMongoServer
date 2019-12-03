@@ -5,14 +5,14 @@ const cookieParser=require('cookie-parser');
 const MongoStore=require('connect-mongo')(session);
 const formidable=require('express-formidable');
 const bcrypt=require('bcrypt');
-/* const cors=require('cors'); */
+const cors=require('cors');
 const mailService=require('../mail/mailService.js');
 const uniqid=require('uniqid');
 const emails=require('../mail/emails.js');
 
 
 const router=express.Router();
-mongoose.connect('mongodb://mongo:27017/game', {useNewUrlParser: true}).then(()=>{
+mongoose.connect('mongodb://localhost:27017/game', {useNewUrlParser: true}).then(()=>{
     console.log('connected')
 }).catch((error)=>{
     console.error(error)
@@ -20,10 +20,10 @@ mongoose.connect('mongodb://mongo:27017/game', {useNewUrlParser: true}).then(()=
 
 router.use(cookieParser());
 router.use(formidable());
-/* router.use(cors({
+router.use(cors({
     credentials: true,
     origin: 'http://localhost:3000'
-})); */
+}));
 
 router.use(session({
     secret: 'very-secret',

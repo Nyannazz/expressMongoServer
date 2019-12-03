@@ -1,14 +1,14 @@
 {
-  "main.css": "/static/css/main.a1de4aa4.chunk.css",
-  "main.js": "/static/js/main.3251ca90.chunk.js",
-  "main.js.map": "/static/js/main.3251ca90.chunk.js.map",
-  "static/js/1.9c924489.chunk.js": "/static/js/1.9c924489.chunk.js",
-  "static/js/1.9c924489.chunk.js.map": "/static/js/1.9c924489.chunk.js.map",
+  "main.css": "/static/css/main.7bdea76c.chunk.css",
+  "main.js": "/static/js/main.c2f4e9b8.chunk.js",
+  "main.js.map": "/static/js/main.c2f4e9b8.chunk.js.map",
+  "static/js/1.fe70171d.chunk.js": "/static/js/1.fe70171d.chunk.js",
+  "static/js/1.fe70171d.chunk.js.map": "/static/js/1.fe70171d.chunk.js.map",
   "runtime~main.js": "/static/js/runtime~main.229c360f.js",
   "runtime~main.js.map": "/static/js/runtime~main.229c360f.js.map",
   "static/media/brainLogo.svg": "/static/media/brainLogo.8e02dfbf.svg",
-  "static/css/main.a1de4aa4.chunk.css.map": "/static/css/main.a1de4aa4.chunk.css.map",
+  "static/css/main.7bdea76c.chunk.css.map": "/static/css/main.7bdea76c.chunk.css.map",
   "index.html": "/index.html",
-  "precache-manifest.7e61852d343c9f364569167b8aeb64b1.js": "/precache-manifest.7e61852d343c9f364569167b8aeb64b1.js",
+  "precache-manifest.7f5ad11dd7cb83e860f67add3bd95c12.js": "/precache-manifest.7f5ad11dd7cb83e860f67add3bd95c12.js",
   "service-worker.js": "/service-worker.js"
 }
